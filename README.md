@@ -82,19 +82,23 @@ Inst_2:
 
 - Create Jenkins Job, Configure it like this:
 	Source Code Management:
-		Repository: https://github.com/ValaxyTech/hello-world.git
-		Branches to build : */master
+	
+	Repository: https://github.com/ValaxyTech/hello-world.git
+	Branches to build : */master
+	
 	Build:
-		Maven Version : Maven		
- 		Goals:	clean install package
- 		POM: pom.xml
+	
+	Maven Version : Maven		
+ 	Goals:	clean install package
+ 	POM: pom.xml
 
 	Post-build Actions: 
-		Deploy war/ear to container
-			WAR/EAR files : **/*.war
-		     Containers : Tomcat 8.x
-			Credentials: Tomcat_user (created recently)
-			Tomcat URL : http://PUBLIC_IP:PORT_NO
+	
+	Deploy war/ear to container
+		WAR/EAR files : **/*.war
+	Containers : Tomcat 8.x
+		Credentials: Tomcat_user (created recently)
+		Tomcat URL : http://PUBLIC_IP:PORT_NO
 
 - Add Build Triggers for CI/CD : -configure jenkins job to:
 	 Build Triggers
@@ -154,15 +158,17 @@ PROJECT 2:
 - Configure job on Jenkins server and add following to current configurations:
 	Add post-build steps
 
-	    Send files or execute commands over SSH
-		SSH Server : ansible_server
-		Source fiels: webapp/target/*.war
-		Remote directory: //opt//playbooks
-		Add post-build steps
+	Send files or execute commands over SSH
+	
+	SSH Server : ansible_server
+	Source fiels: webapp/target/*.war
+	Remote directory: //opt//playbooks
+	Add post-build steps
 
-	    Send files or execute commands over SSH
-		SSH Server : ansible_server
-		Exec command ansible-playbook /opt/playbooks/copywarfile.yml
+	Send files or execute commands over SSH
+	
+	SSH Server : ansible_server
+	Exec command ansible-playbook /opt/playbooks/copywarfile.yml
 
 PROJECT 3: 
 
@@ -186,8 +192,10 @@ PROJECT 3:
 	vi Dockerfile
 
 	From tomcat:8-jre8 
-	MAINTAINER "valaxytech" #Maintainer
-	COPY ./webapp.war /usr/local/tomcat/webapps #copy war file on to container 
+	
+	MAINTAINER "valaxytech" 
+	
+	COPY ./webapp.war /usr/local/tomcat/webapps 
 
 - On Jenkins server, add Docker server:
 	Manage Jenkins > Configure system > Publish over SSH > Add server (docker)

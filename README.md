@@ -52,11 +52,17 @@ Inst_1:
 Inst_2:
 
 - Edit bash_profile:
+
 	vi ~/.bash_profile
+	
+	write in file following:
  
 	JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el8_1.x86_64
+	
 	PATH=$PATH:$JAVA_HOME:$HOME/bin
+	
 	export PATH
+
 
 	source ~/.bash_profile 
 
@@ -75,26 +81,39 @@ Inst_2:
 
 - Setup credetnials for deployment:
 	Credentials (on side) > global (under Domain) > Add Credentials
+	
 	Username : deployer
+	
 	Password : deployer
+	
 	id : Tomcat_user
+	
 	Description: Tomcat user to deploy on tomcat server
+	
 
 - Create Jenkins Job, Configure it like this:
-	Source Code Management:
-		Repository: https://github.com/ValaxyTech/hello-world.git
-		Branches to build : */master
-	Build:
-		Maven Version : Maven		
- 		Goals:	clean install package
- 		POM: pom.xml
 
-	Post-build Actions: 
-		Deploy war/ear to container
-			WAR/EAR files : **/*.war
-		     Containers : Tomcat 8.x
-			Credentials: Tomcat_user (created recently)
-			Tomcat URL : http://PUBLIC_IP:PORT_NO
+	- Source Code Management:
+	
+	Repository: https://github.com/ValaxyTech/hello-world.git
+	
+	Branches to build : */master
+	
+	- Build:
+	
+	Maven Version : Maven	
+	
+ 	Goals:	clean install package
+	
+ 	POM: pom.xml
+
+	- Post-build Actions: 
+	
+	Deploy war/ear to container
+		WAR/EAR files : **/*.war
+	Containers : Tomcat 8.x
+		Credentials: Tomcat_user (created recently)
+		Tomcat URL : http://PUBLIC_IP:PORT_NO
 
 - Add Build Triggers for CI/CD : -configure jenkins job to:
 	 Build Triggers
@@ -108,61 +127,91 @@ PROJECT 2:
 
 - Install ansible on Inst_3 : 
 	rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+	
 	yum install ansible -y
 
 - Add user and assign password:
+
 	useradd ansadmin
+	
 	passwd ansadmin
 
 - Modify sudoers file, add among users:
+
 	ansadmin ALL=(ALL)       NOPASSWD: ALL
 
 - Add hosts to hosts file (/etc/ansible/hosts)
+
 	cd /etc/ansible/hosts
+	
 	vi hosts
 
 	Add tagrget server IP address
 
 - Modify ssh_config file (Password configuration) for keybased authentication:
+
 	vi /etc/ssh/sshd_config
+	
 	PasswordAuthentication yes (no to yes)
 
-- Generate key: ssh-keygen
-- Copy key for client : ssh-copy-id <target-server-IP-address>
+- Generate key: 
+
+	ssh-keygen
+
+- Copy key for client : 
+
+	ssh-copy-id 'target-server-IP-address'
  
 
 - Install plugin : publish Over SSH
 
 - Enable connection between Jenkins server and Ansible server, Add Ansible server
+
  	Manage Jenkins > Configure System > Publish Over SSH > SSH Servers > Add
 	
 	SSH Servers:
-	Hostname:<ServerIPAddress>
+	
+	
+	Hostname:ServerIPAddress
+	
 	username: ansadmin
+	
 	password: *****
 
-- Create Ansible playbook on Inst_3:
+- Create Ansible playbook on Inst_3: (playbook shuold contain this)
 ---
-- hosts: all 
-  become: true
-  tasks: 
+
+    ---	 
+    -hosts: all 
+  
+    become: true
+  
+    tasks: 
+  
     - name: copy jar/war onto tomcat servers
         copy:
           src: /op/playbooks/wabapp/target/webapp.war
           dest: /opt/apache-tomcat-8.5.32/webapps
-
+(end of file)
 - Configure job on Jenkins server and add following to current configurations:
-	Add post-build steps
 
-	    Send files or execute commands over SSH
-		SSH Server : ansible_server
-		Source fiels: webapp/target/*.war
-		Remote directory: //opt//playbooks
-		Add post-build steps
+	- Add post-build steps
 
-	    Send files or execute commands over SSH
-		SSH Server : ansible_server
-		Exec command ansible-playbook /opt/playbooks/copywarfile.yml
+	Send files or execute commands over SSH:
+	
+	SSH Server : ansible_server
+	
+	Source fiels: webapp/target/*.war
+	
+	Remote directory: //opt//playbooks
+	
+	- Add post-build steps
+
+	Send files or execute commands over SSH:
+	
+	SSH Server : ansible_server
+	
+	Exec command ansible-playbook /opt/playbooks/copywarfile.yml
 
 PROJECT 3: 
 
@@ -171,51 +220,83 @@ PROJECT 3:
 	Inst_4 : 1 instance for Docker server: Red Hat Enterprise Linux 8 (HVM), SSD Volume Type, General Purpose t2.micro (new Security Group)
 
 - Install Docker on Inst_4 and start service:
+
 	yum install docker
+	
 	service docker start
 
 - Add user for docker managment and create password for it and add user in group (if group does not exist run: groupadd GroupName)
+
 	useradd dockeradmin
+	
 	passwd dockeradmin
+	
 	usermod -aG docker dockeradmin
 
 - Write in DockerFile:
-	cd opt/
-	mkdir docker
-	cd docker 
-	vi Dockerfile
 
+	cd opt/
+	
+	mkdir docker
+	
+	cd docker 
+	
+	vi Dockerfile
+	
+	-Write in file: 
+	
 	From tomcat:8-jre8 
-	MAINTAINER "valaxytech" #Maintainer
-	COPY ./webapp.war /usr/local/tomcat/webapps #copy war file on to container 
+	
+	MAINTAINER "valaxytech" 
+	
+	COPY ./webapp.war /usr/local/tomcat/webapps 
 
 - On Jenkins server, add Docker server:
+
 	Manage Jenkins > Configure system > Publish over SSH > Add server (docker)
 
 - Create new Jenkins job and configure it to look like this: 
-	Source Code Management
-		Repository : https://github.com/ValaxyTech/hello-world.git
-		Branches to build : */master
+	
+	- Source Code Management
+	
+	Repository : https://github.com/ValaxyTech/hello-world.git
+		
+	Branches to build : */master
 
-	Build Root POM: pom.xml
-		Goals and options : clean install package
+	- Build 
+	
+	Root POM: pom.xml
+	
+	Goals and options : clean install package
 
-	send files or execute commands over SSH Name: docker_host
-		Source files : webapp/target/*.war Remove prefix : webapp/target Remote directory : //opt//docker
-		Exec command[s] :
-		docker stop valaxy_demo;
-		docker rm -f valaxy_demo;
-		docker image rm -f valaxy_demo;
-		cd /opt/docker;
-		docker build -t valaxy_demo .
+	- send files or execute commands over SSH Name: docker_host
+	
+	Source files : webapp/target/*.war Remove prefix : webapp/target Remote directory : //opt//docker
+		
+	Exec command[s] :
+		
+	docker stop valaxy_demo;
+		
+	docker rm -f valaxy_demo;
+		
+	docker image rm -f valaxy_demo;
+		
+	cd /opt/docker;
+		
+	docker build -t valaxy_demo .
 
-	send files or execute commands over SSH
-		Name: docker_host
-		Exec command : docker run -d --name valaxy_demo -p 8090:8080 valaxy_demo
+	- send files or execute commands over SSH
+	
+	Name: docker_host
+		
+	Exec command : docker run -d --name valaxy_demo -p 8090:8080 valaxy_demo
 
 - Check docker images and containers before and after execution of Jenkins job:
+
 	cd opt/docker
+	
 	docker images
+	
 	docker ps
 	
 

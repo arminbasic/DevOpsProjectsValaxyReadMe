@@ -13,12 +13,12 @@ PROJECT 1:
 - Install wget on both instances : yum -y install wget
 
 - Both Security Groups modified to look like this:
-	Inbound rules:
+ Inbound rules:
 SSH	TCP	22	0.0.0.0/0	-
 Custom TCP	TCP	8090	0.0.0.0/0	-
 Custom TCP	TCP	8090	::/0	-
 
-	Outbound rules:
+  Outbound rules:
 All traffic	All	All	0.0.0.0/0	-
 
 Inst_1:
@@ -44,9 +44,9 @@ Inst_1:
 	<role rolename="manager-script"/>
 	<role rolename="manager-jmx"/>
 	<role rolename="manager-status"/>
-	<user username="admin" password="admin" roles="manager-gui, manager-script, manager-jmx, manager-status"/>
-	<user username="deployer" password="deployer" roles="manager-script"/>
-	<user username="tomcat" password="s3cret" roles="manager-gui"/>
+	<user username="admin" password=$password roles="manager-gui, manager-script, manager-jmx, manager-status"/>
+	<user username="deployer" password=$password roles="manager-script"/>
+	<user username="tomcat" password=$password roles="manager-gui"/>
 
 
 Inst_2:
@@ -299,4 +299,4 @@ PROJECT 3:
 	
 	docker ps
 	
-
+* For all password modify existing or create custom password

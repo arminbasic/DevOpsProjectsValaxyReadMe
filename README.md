@@ -186,10 +186,8 @@ PROJECT 3:
 	vi Dockerfile
 
 	From tomcat:8-jre8 
-	# Maintainer
-	MAINTAINER "valaxytech" 
-	# copy war file on to container 
-	COPY ./webapp.war /usr/local/tomcat/webapps
+	MAINTAINER "valaxytech" #Maintainer
+	COPY ./webapp.war /usr/local/tomcat/webapps #copy war file on to container 
 
 - On Jenkins server, add Docker server:
 	Manage Jenkins > Configure system > Publish over SSH > Add server (docker)
